@@ -100,16 +100,25 @@ async function loadApplications() {
   }
 }
 
+let isBusyForm = false;
 form.addEventListener('submit', async event => {
   event.preventDefault();
+
+  if (isBusyForm) {
+    return;
+  }
+
   const data = new FormData(form);
   const values = { name: String(data.get('name').trim() || ''), topic: String(data.get('topic') || ''), comment: String(data.get('comment') || '') };
   if (!permitted('submit', { topic: values.topic, supportCode: String(data.get('supportCode') || '') })) return;
   const error = validate(values);
   if (error) { setFormStatus(error, 'error'); return; }
   const currentRevision = revision;
+
   setFormStatus('Отправляем заявку…', 'pending');
   form.setAttribute('aria-busy', 'true');
+  isBusyForm = true;
+
   try {
     const response = await createApplication({ ...values, name: values.name });
     const result = await response.json();
@@ -121,6 +130,7 @@ form.addEventListener('submit', async event => {
     if (currentRevision === revision) setFormStatus(error.message || 'Не удалось отправить заявку.', 'error');
   } finally {
     if (currentRevision === revision) form.setAttribute('aria-busy', 'false');
+    isBusyForm = false;
   }
 });
 
