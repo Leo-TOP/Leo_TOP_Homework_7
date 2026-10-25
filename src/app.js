@@ -135,6 +135,8 @@ document.querySelector('#refresh-button').addEventListener('click', () => {
 });
 
 document.querySelector('#reset-interface').addEventListener('click', () => {
+  selectedId = null;
+  filter.value = 'all';
   form.reset();
   setFormStatus('Интерфейс сброшен.');
   renderApplications();
